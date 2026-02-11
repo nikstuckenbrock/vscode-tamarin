@@ -1,15 +1,15 @@
-#  Contribute
+# Contribute
 
-Contributions welcome !
+Contributions welcome!
 
 How to start using the git repository:
 
-- Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder. 
+- Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder.
 - Open VS Code on this folder.
 - Press Ctrl+Shift+B To compile the plugin
 - Press Ctrl+Shift+D , click on the green arrow "Run Client" in the top left-hand corner
-- Then in the test window open a Tamarin document (.spthy) and test the code. (There is no need to uninstal tamarin-prover official VsCode extension)
+- Then in the test window open a Tamarin document (.spthy) and test the code. (There is no need to uninstall tamarin-prover official VsCode extension)
 - You can see debug logs in the output section of the terminal , selecting "Tamarin Language Server" instead of tasks at the right.
-- Run ` npm clean` to remove all packages and compiled files.
+- Run `npm clean` to remove all packages and compiled files.
 
 More documentation is located in Documentation folder.
