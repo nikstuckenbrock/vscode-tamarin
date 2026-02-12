@@ -19,7 +19,7 @@ function get_child_index(node : Parser.SyntaxNode): number|null{
 }
 
 /* Function used to detect syntax errors sent by the parser with MISSING or ERROR nodes,
-I tried to personnalize error messages according to the different cases
+I tried to personalize error messages according to the different cases
 I did the most common ones*/
 export async function detect_errors(tree:Parser.SyntaxNode,document: TextDocument): Promise<{diagnostics: Diagnostic[] }> {
     const diags: Diagnostic[] = [];
