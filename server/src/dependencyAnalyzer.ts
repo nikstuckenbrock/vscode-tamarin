@@ -222,7 +222,16 @@ export class DependencyAnalyzer {
      * @returns The parsed tree, symbol table and document related diagnostics
      */
     private async analyzeFile(doc: TextDocument): Promise<{ tree: Parser.Tree; symbolTable: TamarinSymbolTable; diags: Diagnostic[] }> {
-        const tree = this.splibParser?.parse(doc.getText());
+         if (!this.spthyParser || !this.splibParser) {
+            throw new Error("Parser not initialized");
+        }
+        const parserToUse: Parser = doc.uri.endsWith('.splib')
+            ? this.splibParser
+            : this.spthyParser;
+        if (!parserToUse) {
+            throw new Error(`No parser available for URI: ${doc.uri}`);
+        }
+        const tree = parserToUse.parse(doc.getText());
         if (!tree) {
             throw new Error(``);
         }
