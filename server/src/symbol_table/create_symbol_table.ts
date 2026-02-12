@@ -1,5 +1,7 @@
 import { TextDocument } from "vscode-languageserver-textdocument";
 import * as Parser from "web-tree-sitter";
+import * as path from "path";
+import { URI } from "vscode-uri";
 import { Range} from 'vscode-languageserver/node';
 import { check_reserved_facts} from '../features/checks/checkReservedFacts';
 import {getName} from '../features/checks/utils'
@@ -440,6 +442,23 @@ export class TamarinSymbolTable{
     public getIncludes(): string[] {
         return this.includes;
     }
+
+    /**
+     * Converts the include paths relative to the file where they are used.
+     * @param sourceFileUri The URI of the source file
+     * @returns Full file paths relative to the sourceFileUri
+     */
+    public getRelativeIncludePaths(sourceFileUri: string): string[] {
+        const results = [];
+        for (const included of this.getIncludes()) {
+            const fsPath = URI.parse(sourceFileUri).fsPath;
+            const parentDir = path.dirname(fsPath);
+            const filePath = "file://".concat(parentDir).concat("/").concat(included)
+            results.push(filePath);
+        }
+        return results;
+    }
+
     public addSymbol(symbol: TamarinSymbol) {
         this.symbols.push(symbol);
     }

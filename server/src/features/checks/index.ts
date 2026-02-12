@@ -10,19 +10,26 @@ import { check_free_term_in_lemma } from './checkFreeTerms';
 import { check_macro_not_in_equation } from './checkMacrosInEquations';
 import { check_infix_operators } from './checkInfixOperators';
 import { check_case_sensitivity } from './checkSpelling';
-import { check_equality_types} from './checkEqualityTypes'
+import { check_equality_types } from './checkEqualityTypes'
+import { DependencyAnalyzer } from "../../dependencyAnalyzer";
 
 
-export function checks_with_table(symbol_table : TamarinSymbolTable, document: TextDocument, root : Parser.SyntaxNode,allSymbolTables: Map<string, TamarinSymbolTable>): Diagnostic[]{
+export function checks_with_table(
+    symbol_table: TamarinSymbolTable,
+    document: TextDocument,
+    root: Parser.SyntaxNode,
+    allSymbolTables: Map<string, TamarinSymbolTable>,
+    dependencyAnalyzer: DependencyAnalyzer
+): Diagnostic[] {
     const typeErrors = check_variables_type_is_consistent_inside_a_rule(symbol_table, document);
-    const premiseErrors = check_variable_is_defined_in_premise(symbol_table, document);
-    const actionFactErrors = check_action_fact(symbol_table, document,allSymbolTables);
+    const premiseErrors = check_variable_is_defined_in_premise(symbol_table, document, dependencyAnalyzer);
+    const actionFactErrors = check_action_fact(symbol_table, document, allSymbolTables);
     const arityErrors = check_function_macros_and_facts_arity(symbol_table, document, allSymbolTables);
     const freeTermWarnings = check_free_term_in_lemma(symbol_table, document);
     const macroInEquationErrors = check_macro_not_in_equation(symbol_table, document);
     const infixOperatorErrors = check_infix_operators(symbol_table, document, root);
-    const spellingWarnings = check_case_sensitivity(symbol_table, document,allSymbolTables);
-    const equalityErrors = check_equality_types(symbol_table,document);
+    const spellingWarnings = check_case_sensitivity(symbol_table, document, allSymbolTables);
+    const equalityErrors = check_equality_types(symbol_table, document);
     const allDiagnostics = [
         ...typeErrors,
         ...premiseErrors,

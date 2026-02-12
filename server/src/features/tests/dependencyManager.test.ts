@@ -1,22 +1,22 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Position} from 'vscode-languageserver-types';
-import { AnalysisManager } from '../../AnalysisManager';
+import { DependencyAnalyzer } from '../../dependencyAnalyzer';
 import * as path from 'path';
 
-let analysisManager: AnalysisManager;
+let dependencyAnalyzer: DependencyAnalyzer;
 const docUri = 'file:///test.spthy';
 
 
 beforeAll(async () => {
-    analysisManager = new AnalysisManager();
+    dependencyAnalyzer = new DependencyAnalyzer();
     const SpthyParserPath = path.resolve(process.cwd(), 'server/grammar/tree-sitter-tamarin/tree-sitter-spthy.wasm');
     const SplibParserPath = path.resolve(process.cwd(), 'server/grammar/tree-sitter-tamarin/tree-sitter-splib.wasm');
-    await analysisManager.initParsers(SpthyParserPath,SplibParserPath);
+    await dependencyAnalyzer.initParsers(SpthyParserPath,SplibParserPath);
 });
 
 const setupTest = async (content: string): Promise<TextDocument> => {
     const document = TextDocument.create(docUri, 'tamarin', 1, content);
-    await analysisManager.AnalyseDocument(document);
+    await dependencyAnalyzer.diagnoseDocument(document);
     return document;
 };
 
@@ -33,7 +33,7 @@ describe('AnalysisManager: getDefinition', () => {
         `;
         const document = await setupTest(content);
         const position = Position.create(6, 20); 
-        const location = analysisManager.getDefinition(document, position);
+        const location = dependencyAnalyzer.getDefinition(document, position)[0];
         expect(location).not.toBeNull();
         expect(location?.uri).toBe(docUri);
         expect(location?.range.start.line).toBe(4); 
@@ -51,8 +51,8 @@ describe('AnalysisManager: getDefinition', () => {
         `;
         const document = await setupTest(content);
         const position = Position.create(0, 20); 
-        const location = analysisManager.getDefinition(document, position);
-        expect(location).toBeNull();
+        const location = dependencyAnalyzer.getDefinition(document, position);
+        expect(location.length === 0);
     });
 });
 
@@ -70,7 +70,7 @@ end
         const document = await setupTest(content);
         const position = Position.create(4, 5); 
         const newName = 'y';
-        const workspaceEdit = analysisManager.handleRenameRequest(document, position, newName);
+        const workspaceEdit = dependencyAnalyzer.handleRenameRequest(document, position, newName);
         expect(workspaceEdit).not.toBeNull();
         const edits = workspaceEdit?.changes?.[docUri];
         expect(edits).toBeDefined();
@@ -92,7 +92,7 @@ end
         const document = await setupTest(content);
         const position = Position.create(5, 14);
         const newName = 'y';
-        const workspaceEdit = analysisManager.handleRenameRequest(document, position, newName);
+        const workspaceEdit = dependencyAnalyzer.handleRenameRequest(document, position, newName);
         const edits = workspaceEdit?.changes?.[docUri];
         expect(edits).toBeDefined();
         expect(edits).toHaveLength(2);
