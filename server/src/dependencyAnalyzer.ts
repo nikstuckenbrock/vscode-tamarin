@@ -38,20 +38,29 @@ export class DependencyAnalyzer {
      * This means building a dependency graph and global symbol table.
      * These objects are then used to do further checks.
      * @param root The root directory of the workspace.
+     * @param openedDocuments Currently opened documents.
      */
-    public async analyzeWorkspace(root: string) {
+    public async analyzeWorkspace(root: string, openedDocuments: TextDocument[]) {
         const files = await DependencyAnalyzer.getAllTamarinFiles(root);
+
+        // Parse all files and build symbol tables
         for (const file of files) {
             const content = fs.readFileSync(file, "utf-8");
             const doc = TextDocument.create("file://".concat(file), 'tamarin', 1, content);
             await this.analyzeFile(doc);
         }
 
+        // Build reverse graph for includedBy lookups
         for (const [file, table] of this.symbolTable.entries()) {
             for (const included of table.getRelativeIncludePaths(file)) {
                 if (!this.reverseIncludes.has(included)) this.reverseIncludes.set(included, []);
                 this.reverseIncludes.get(included)!.push(file);
             }
+        }
+
+        // Check all opened documents
+        for (const doc of openedDocuments) {
+            await this.diagnoseDocument(doc);
         }
     }
 
@@ -82,6 +91,7 @@ export class DependencyAnalyzer {
             if (parents.length === 0) {
                 return current
             }
+            // TODO: What should be done if there is more than one opened incident?
             current = parents[0];
         }
         return current;

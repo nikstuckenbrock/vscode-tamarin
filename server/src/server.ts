@@ -44,12 +44,11 @@ connection.onInitialized(async () => {
     const rootPath = workspaceFolders[0].uri.replace("file://", "");
     console.log("Workspace root:", rootPath);
 
-    await dependencyAnalyzer.analyzeWorkspace(rootPath);
+    await dependencyAnalyzer.analyzeWorkspace(rootPath, documents.all());
 });
 
 documents.onDidChangeContent(async (change) => {
     console.error(`[Server] File changed: ${change.document.uri}. Triggering validation.`);
-    //const diagnostics = await analysisManager.AnalyseDocument(change.document);
     const diagnostics = await dependencyAnalyzer.diagnoseDocument(change.document);
 
     connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
